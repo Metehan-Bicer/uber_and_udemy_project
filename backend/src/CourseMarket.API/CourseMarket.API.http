@@ -1,0 +1,6 @@
+@CourseMarket.API_HostAddress = http://localhost:5032
+
+GET {{CourseMarket.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
