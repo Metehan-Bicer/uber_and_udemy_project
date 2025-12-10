@@ -61,11 +61,29 @@ public class ConfirmPurchaseCommandHandler : IRequestHandler<ConfirmPurchaseComm
             });
         }
 
-        // Get payment intent details from Stripe to extract metadata
-        var service = new PaymentIntentService();
-        var paymentIntent = await service.GetAsync(request.PaymentIntentId, cancellationToken: cancellationToken);
-
-        var courseId = int.Parse(paymentIntent.Metadata["courseId"]);
+        // Get payment intent details
+        int courseId;
+        
+        if (request.PaymentIntentId.StartsWith("mock_secret_"))
+        {
+            // Format: mock_secret_{guid}_{courseId}_{userId}
+            var parts = request.PaymentIntentId.Split('_');
+            if (parts.Length >= 4)
+            {
+                courseId = int.Parse(parts[3]);
+            }
+            else
+            {
+                 return Result<PurchaseDto>.Failure("Invalid mock payment token");
+            }
+        }
+        else
+        {
+            // Get payment intent details from Stripe to extract metadata
+            var service = new PaymentIntentService();
+            var paymentIntent = await service.GetAsync(request.PaymentIntentId, cancellationToken: cancellationToken);
+            courseId = int.Parse(paymentIntent.Metadata["courseId"]);
+        }
         var userId = _currentUser.UserId;
 
         // Get course

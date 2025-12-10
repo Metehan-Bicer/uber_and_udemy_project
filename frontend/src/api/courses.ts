@@ -22,6 +22,11 @@ export const coursesApi = {
     return response.data;
   },
 
+  getMyCreatedCourses: async (): Promise<CourseListItem[]> => {
+    const response = await apiClient.get<CourseListItem[]>('/courses/my-created-courses');
+    return response.data;
+  },
+
   create: async (data: CreateCourseRequest): Promise<Course> => {
     const response = await apiClient.post<Course>('/courses', data);
     return response.data;

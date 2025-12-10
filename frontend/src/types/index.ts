@@ -1,30 +1,34 @@
-// Enums
-export enum UserRole {
-  User = 0,
-  Instructor = 1,
-  Admin = 2
-}
+// UserRole as string to match backend
+export const UserRole = {
+  User: 'User',
+  Instructor: 'Instructor',
+  Admin: 'Admin',
+} as const;
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
-export enum RequestStatus {
-  Pending = 0,
-  Assigned = 1,
-  Completed = 2,
-  Cancelled = 3
-}
+export const RequestStatus = {
+  Pending: 0,
+  Assigned: 1,
+  Completed: 2,
+  Cancelled: 3,
+} as const;
+export type RequestStatus = (typeof RequestStatus)[keyof typeof RequestStatus];
 
-export enum PurchaseStatus {
-  Pending = 0,
-  Completed = 1,
-  Failed = 2,
-  Refunded = 3
-}
+export const PurchaseStatus = {
+  Pending: 0,
+  Completed: 1,
+  Failed: 2,
+  Refunded: 3,
+} as const;
+export type PurchaseStatus = (typeof PurchaseStatus)[keyof typeof PurchaseStatus];
 
-export enum NotificationType {
-  LessonAssignment = 0,
-  PurchaseConfirmation = 1,
-  LessonCompleted = 2,
-  General = 3
-}
+export const NotificationType = {
+  LessonAssignment: 0,
+  PurchaseConfirmation: 1,
+  LessonCompleted: 2,
+  General: 3,
+} as const;
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];
 
 // Auth Types
 export interface User {

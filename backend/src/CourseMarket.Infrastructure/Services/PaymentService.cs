@@ -9,14 +9,32 @@ public class PaymentService : IPaymentService
 {
     private readonly IApplicationDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly bool _isMockMode;
 
     public PaymentService(IApplicationDbContext context, IConfiguration configuration)
     {
         _context = context;
         _configuration = configuration;
 
-        // Set Stripe API key
-        StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
+        // Check if Stripe keys are valid, otherwise use Mock Mode
+        var secretKey = _configuration["Stripe:SecretKey"];
+        // If key is empty or default placeholder, enable mock mode
+        if (string.IsNullOrEmpty(secretKey) || secretKey.Contains("your_stripe_secret_key"))
+        {
+            _isMockMode = true;
+        }
+        else
+        {
+            try
+            {
+                StripeConfiguration.ApiKey = secretKey;
+                _isMockMode = false;
+            }
+            catch
+            {
+                _isMockMode = true;
+            }
+        }
     }
 
     public async Task<string> CreatePaymentIntentAsync(int courseId, int userId, CancellationToken cancellationToken = default)
@@ -38,6 +56,13 @@ public class PaymentService : IPaymentService
         if (existingPurchase)
         {
             throw new InvalidOperationException("Course already purchased");
+        }
+
+        if (_isMockMode)
+        {
+            // Return a mock client secret
+            // Format: mock_secret_{guid}_{courseId}_{userId}
+            return $"mock_secret_{Guid.NewGuid()}_{courseId}_{userId}";
         }
 
         // Create Stripe PaymentIntent
@@ -65,6 +90,11 @@ public class PaymentService : IPaymentService
 
     public async Task<bool> VerifyPaymentAsync(string paymentIntentId, CancellationToken cancellationToken = default)
     {
+        if (paymentIntentId.StartsWith("mock_secret_"))
+        {
+            return true;
+        }
+
         try
         {
             var service = new PaymentIntentService();
@@ -80,6 +110,11 @@ public class PaymentService : IPaymentService
 
     public async Task<string?> GetPaymentIntentStatusAsync(string paymentIntentId, CancellationToken cancellationToken = default)
     {
+        if (paymentIntentId.StartsWith("mock_secret_"))
+        {
+            return "succeeded";
+        }
+
         try
         {
             var service = new PaymentIntentService();

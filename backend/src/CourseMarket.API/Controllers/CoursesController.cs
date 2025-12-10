@@ -68,6 +68,21 @@ public class CoursesController : ControllerBase
     }
 
     [Authorize(Roles = "Instructor,Admin")]
+    [HttpGet("my-created-courses")]
+    public async Task<IActionResult> GetMyCreatedCourses()
+    {
+        var query = new GetMyCreatedCoursesQuery();
+        var result = await _mediator.Send(query);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { error = result.Error });
+        }
+
+        return Ok(result.Data);
+    }
+
+    [Authorize(Roles = "Instructor,Admin")]
     [HttpPost]
     public async Task<IActionResult> CreateCourse([FromBody] CreateCourseCommand command)
     {

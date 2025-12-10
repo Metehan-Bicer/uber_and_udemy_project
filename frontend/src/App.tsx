@@ -13,6 +13,7 @@ import { CourseDetailPage } from './pages/CourseDetailPage';
 import { MyCoursesPage } from './pages/MyCoursesPage';
 import { LiveLessonsPage } from './pages/LiveLessonsPage';
 import { InstructorDashboardPage } from './pages/InstructorDashboardPage';
+import { InstructorCoursesPage } from './pages/InstructorCoursesPage';
 
 function App() {
   const { initializeAuth } = useAuthStore();
@@ -55,6 +56,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole={UserRole.Instructor}>
               <InstructorDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/instructor/courses"
+          element={
+            <ProtectedRoute requiredRole={UserRole.Instructor}>
+              <InstructorCoursesPage />
             </ProtectedRoute>
           }
         />

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CourseMarket.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/live-lessons")]
 [Authorize]
 public class LiveLessonsController : ControllerBase
 {

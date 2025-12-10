@@ -1,213 +1,226 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { liveLessonsApi } from '../api/liveLessons';
 import { Layout } from '../components/layout/Layout';
-import { Card, CardBody, CardHeader } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+// import { Card, CardBody, CardHeader } from '../components/ui/Card'; // Custom glass design
 import { Input } from '../components/ui/Input';
-import { RequestStatus } from '../types';
+import { RequestStatus, UserRole } from '../types';
+import { useAuthStore } from '../store/authStore';
 
 export const LiveLessonsPage = () => {
-  const queryClient = useQueryClient();
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    topic: '',
-    description: '',
-    preferredDate: '',
-    duration: 60,
-  });
+    const [topic, setTopic] = useState('');
+    const [description, setDescription] = useState('');
+    const [date, setDate] = useState('');
+    const [duration, setDuration] = useState(60);
+    const { user } = useAuthStore();
 
-  const { data: requests, isLoading } = useQuery({
-    queryKey: ['my-lesson-requests'],
-    queryFn: liveLessonsApi.getMyRequests,
-  });
+    const queryClient = useQueryClient();
 
-  const createRequestMutation = useMutation({
-    mutationFn: liveLessonsApi.createRequest,
-    onSuccess: () => {
-      alert('Lesson request created! We are finding the best instructor for you...');
-      setShowForm(false);
-      setFormData({ topic: '', description: '', preferredDate: '', duration: 60 });
-      queryClient.invalidateQueries({ queryKey: ['my-lesson-requests'] });
-    },
-    onError: (error: any) => {
-      alert(error.response?.data?.error || 'Failed to create request');
-    },
-  });
+    const { data: requests, isLoading } = useQuery({
+        queryKey: ['my-lesson-requests'],
+        queryFn: liveLessonsApi.getMyRequests,
+        enabled: user?.role !== UserRole.Instructor,
+    });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createRequestMutation.mutate(formData);
-  };
+    const createMutation = useMutation({
+        mutationFn: liveLessonsApi.createRequest,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['my-lesson-requests'] });
+            setTopic('');
+            setDescription('');
+            setDate('');
+            setDuration(60);
+            alert('Lesson request created successfully! An instructor will be assigned shortly.');
+        },
+        onError: (error) => {
+            console.error('Failed to create request:', error);
+            alert('Failed to create lesson request. Please try again.');
+        }
+    });
 
-  const getStatusColor = (status: RequestStatus) => {
-    switch (status) {
-      case RequestStatus.Pending:
-        return 'bg-yellow-100 text-yellow-800';
-      case RequestStatus.Assigned:
-        return 'bg-green-100 text-green-800';
-      case RequestStatus.Completed:
-        return 'bg-blue-100 text-blue-800';
-      case RequestStatus.Cancelled:
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        createMutation.mutate({
+            topic,
+            description,
+            preferredDate: new Date(date).toISOString(),
+            duration,
+        });
+    };
 
-  const getStatusText = (status: RequestStatus) => {
-    switch (status) {
-      case RequestStatus.Pending:
-        return 'Finding Instructor...';
-      case RequestStatus.Assigned:
-        return 'Instructor Assigned';
-      case RequestStatus.Completed:
-        return 'Completed';
-      case RequestStatus.Cancelled:
-        return 'Cancelled';
-      default:
-        return 'Unknown';
-    }
-  };
-
-  return (
-    <Layout>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Live Lesson Requests</h1>
-          <Button onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : 'Request Live Lesson'}
-          </Button>
-        </div>
-
-        {showForm && (
-          <Card className="mb-8">
-            <CardHeader>
-              <h2 className="text-xl font-bold">Request a Live Lesson</h2>
-            </CardHeader>
-            <CardBody>
-              <form onSubmit={handleSubmit}>
-                <Input
-                  label="Topic"
-                  value={formData.topic}
-                  onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                  required
-                  placeholder="e.g., React Hooks, Python Data Analysis"
-                />
-
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    required
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Describe what you want to learn..."
-                  />
-                </div>
-
-                <Input
-                  label="Preferred Date"
-                  type="datetime-local"
-                  value={formData.preferredDate}
-                  onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
-                  required
-                />
-
-                <Input
-                  label="Duration (minutes)"
-                  type="number"
-                  value={formData.duration}
-                  onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
-                  required
-                  min={30}
-                  max={180}
-                />
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  isLoading={createRequestMutation.isPending}
-                >
-                  Submit Request
-                </Button>
-
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    After submitting, our algorithm will automatically match you with the best
-                    instructor based on topic relevance, availability, and expertise.
-                  </p>
-                </div>
-              </form>
-            </CardBody>
-          </Card>
-        )}
-
-        {isLoading ? (
-          <div className="text-center py-12">Loading your requests...</div>
-        ) : requests && requests.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {requests.map((request) => (
-              <Card key={request.id}>
-                <CardBody>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-bold text-lg">{request.topic}</h3>
-                    <span className={`text-xs px-2 py-1 rounded ${getStatusColor(request.status)}`}>
-                      {getStatusText(request.status)}
-                    </span>
-                  </div>
-
-                  <p className="text-gray-600 text-sm mb-3">{request.description}</p>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Preferred Date:</span>
-                      <span className="font-medium">
-                        {new Date(request.preferredDate).toLocaleString()}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Duration:</span>
-                      <span className="font-medium">{request.duration} minutes</span>
-                    </div>
-
-                    {request.assignment && (
-                      <>
-                        <div className="mt-4 pt-4 border-t">
-                          <p className="text-sm font-semibold text-gray-700 mb-2">
-                            Assigned Instructor:
-                          </p>
-                          <div className="bg-green-50 p-3 rounded-lg">
-                            <p className="font-medium">
-                              {request.assignment.instructor.firstName}{' '}
-                              {request.assignment.instructor.lastName}
-                            </p>
-                            <p className="text-xs text-gray-600">
-                              {request.assignment.instructor.email}
-                            </p>
-                            <p className="text-xs text-green-700 mt-1">
-                              Match Score: {request.assignment.matchScore} points
-                            </p>
-                          </div>
+    // If instructor, redirect to dashboard with message
+    if (user?.role === UserRole.Instructor) {
+        return (
+            <Layout>
+                <div className="pt-24 min-h-screen bg-slate-50">
+                    <div className="max-w-4xl mx-auto px-6">
+                        <div className="text-center py-24">
+                            <div className="bg-white rounded-3xl shadow-xl p-12 border border-slate-100">
+                                <div className="text-6xl mb-6">👨‍🏫</div>
+                                <h1 className="text-3xl font-bold text-slate-900 mb-4">Instructor Dashboard</h1>
+                                <p className="text-lg text-slate-600 mb-8 max-w-md mx-auto">
+                                    As an instructor, you can view and manage your assigned live sessions from your dashboard.
+                                </p>
+                                <Link
+                                    to="/instructor/dashboard"
+                                    className="inline-flex items-center justify-center px-8 py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:scale-105 transition-all"
+                                >
+                                    Go to Your Dashboard →
+                                </Link>
+                            </div>
                         </div>
-                      </>
-                    )}
-                  </div>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">You haven't requested any live lessons yet.</p>
-            <Button onClick={() => setShowForm(true)}>Request Your First Lesson</Button>
-          </div>
-        )}
-      </div>
-    </Layout>
-  );
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
+
+    return (
+        <Layout>
+            <div className="pt-24 min-h-screen bg-slate-50">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="mb-12 text-center">
+                        <h1 className="text-4xl font-bold text-slate-900 mb-4 font-display">Live Mentorship</h1>
+                        <p className="text-slate-500 text-lg max-w-2xl mx-auto">
+                            Need help? Request a 1-on-1 live session and our AI matching algorithm will find the perfect expert for you instantly.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Request Form */}
+                        <div className="lg:col-span-1">
+                            <div className="bg-white/80 backdrop-blur-md border border-indigo-100 rounded-2xl shadow-xl p-6 sticky top-24">
+                                <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                    <span className="bg-indigo-100 text-indigo-600 p-2 rounded-lg">🚀</span>
+                                    Request a Session
+                                </h2>
+
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Topic</label>
+                                        <Input
+                                            value={topic}
+                                            onChange={(e) => setTopic(e.target.value)}
+                                            placeholder="e.g. React Performance Optimization"
+                                            required
+                                            className="bg-white/50"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                                        <textarea
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            placeholder="Describe what you need help with..."
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all resize-none h-32"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Preferred Date</label>
+                                        <Input
+                                            type="datetime-local"
+                                            value={date}
+                                            onChange={(e) => setDate(e.target.value)}
+                                            required
+                                            className="bg-white/50"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Duration (minutes)</label>
+                                        <select
+                                            value={duration}
+                                            onChange={(e) => setDuration(Number(e.target.value))}
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                                        >
+                                            <option value={30}>30 Minutes</option>
+                                            <option value={60}>60 Minutes</option>
+                                            <option value={90}>90 Minutes</option>
+                                            <option value={120}>2 Hours</option>
+                                        </select>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={createMutation.isPending}
+                                        className="w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:scale-[1.02] transition-all disabled:opacity-70 disabled:cursor-wait flex items-center justify-center gap-2"
+                                    >
+                                        {createMutation.isPending ? (
+                                            <>
+                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                Finding Expert...
+                                            </>
+                                        ) : (
+                                            'Find Mentor'
+                                        )}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        {/* Requests List */}
+                        <div className="lg:col-span-2 space-y-6">
+                            <h2 className="text-2xl font-bold text-slate-900 mb-6">Your Requests</h2>
+
+                            {isLoading ? (
+                                <div className="text-center py-12">Loading...</div>
+                            ) : requests?.length === 0 ? (
+                                <div className="text-center py-12 bg-white/50 rounded-2xl border border-dashed border-slate-300">
+                                    <p className="text-slate-500">No requests yet. Create one to get started!</p>
+                                </div>
+                            ) : (
+                                requests?.map((req) => (
+                                    <div key={req.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 hover:shadow-md transition-shadow">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h3 className="text-lg font-bold text-slate-900">{req.topic}</h3>
+                                                <p className="text-sm text-slate-500">Requested on {new Date(req.createdAt).toLocaleDateString()}</p>
+                                            </div>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                                                req.status === RequestStatus.Assigned
+                                                    ? 'bg-emerald-100 text-emerald-700' 
+                                                    : req.status === RequestStatus.Pending
+                                                    ? 'bg-amber-100 text-amber-700'
+                                                    : 'bg-slate-100 text-slate-600'
+                                            }`}>
+                                                {req.status === RequestStatus.Pending ? 'Pending' : 
+                                                 req.status === RequestStatus.Assigned ? 'Assigned' : 
+                                                 req.status === RequestStatus.Completed ? 'Completed' : 'Cancelled'}
+                                            </span>
+                                        </div>
+
+                                        <p className="text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl text-sm">
+                                            {req.description}
+                                        </p>
+
+                                        {req.assignment && (
+                                            <div className="flex items-center gap-4 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                                                <div className="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold">
+                                                    {req.assignment.instructorName.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-indigo-600 font-bold uppercase">Assigned Expert</p>
+                                                    <p className="font-bold text-slate-900">{req.assignment.instructorName}</p>
+                                                </div>
+                                                <div className="ml-auto">
+                                                     <div className="text-right">
+                                                        <p className="text-xs text-slate-500">Match Score</p>
+                                                        <p className="font-bold text-indigo-600 text-lg">{req.assignment.matchScore}%</p>
+                                                     </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Layout>
+    );
 };

@@ -140,7 +140,7 @@ public static class DbSeeder
                 Description = "Learn the basics of React including components, props, state, and hooks. Perfect for beginners.",
                 Price = 49.99m,
                 InstructorId = instructors[0].Id,
-                ImageUrl = "https://via.placeholder.com/400x300?text=React+Fundamentals",
+                ImageUrl = "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -151,7 +151,7 @@ public static class DbSeeder
                 Description = "Master TypeScript with advanced types, generics, decorators, and design patterns.",
                 Price = 79.99m,
                 InstructorId = instructors[0].Id,
-                ImageUrl = "https://via.placeholder.com/400x300?text=Advanced+TypeScript",
+                ImageUrl = "https://images.unsplash.com/photo-1629904853716-6c0abdcc751d?w=800&q=80",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -162,7 +162,7 @@ public static class DbSeeder
                 Description = "Build scalable backend applications with Node.js, Express, and MongoDB.",
                 Price = 69.99m,
                 InstructorId = instructors[0].Id,
-                ImageUrl = "https://via.placeholder.com/400x300?text=Node.js+Backend",
+                ImageUrl = "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&q=80",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -174,7 +174,7 @@ public static class DbSeeder
                 Description = "Learn Python programming for data analysis with pandas, numpy, and matplotlib.",
                 Price = 59.99m,
                 InstructorId = instructors[1].Id,
-                ImageUrl = "https://via.placeholder.com/400x300?text=Python+Data+Analysis",
+                ImageUrl = "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=800&q=80",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -185,7 +185,7 @@ public static class DbSeeder
                 Description = "Introduction to machine learning algorithms, supervised and unsupervised learning.",
                 Price = 89.99m,
                 InstructorId = instructors[1].Id,
-                ImageUrl = "https://via.placeholder.com/400x300?text=Machine+Learning",
+                ImageUrl = "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -196,7 +196,7 @@ public static class DbSeeder
                 Description = "Complete SQL course covering queries, joins, subqueries, and database design.",
                 Price = 39.99m,
                 InstructorId = instructors[1].Id,
-                ImageUrl = "https://via.placeholder.com/400x300?text=SQL+Masterclass",
+                ImageUrl = "https://images.unsplash.com/photo-1667372393119-c81c0cda0a29?w=800&q=80",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -208,7 +208,7 @@ public static class DbSeeder
                 Description = "Learn the fundamental principles of user interface and user experience design.",
                 Price = 54.99m,
                 InstructorId = instructors[2].Id,
-                ImageUrl = "https://via.placeholder.com/400x300?text=UI+UX+Design",
+                ImageUrl = "https://images.unsplash.com/photo-1586717791821-3f44a5638d0f?w=800&q=80",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -219,7 +219,7 @@ public static class DbSeeder
                 Description = "Master Figma for UI design, prototyping, and collaboration.",
                 Price = 44.99m,
                 InstructorId = instructors[2].Id,
-                ImageUrl = "https://via.placeholder.com/400x300?text=Figma+Guide",
+                ImageUrl = "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -230,7 +230,7 @@ public static class DbSeeder
                 Description = "Build beautiful, responsive websites with Tailwind CSS utility-first framework.",
                 Price = 49.99m,
                 InstructorId = instructors[2].Id,
-                ImageUrl = "https://via.placeholder.com/400x300?text=Tailwind+CSS",
+                ImageUrl = "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=800&q=80",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -241,7 +241,7 @@ public static class DbSeeder
                 Description = "Learn photo editing, retouching, and graphic design with Adobe Photoshop.",
                 Price = 34.99m,
                 InstructorId = instructors[2].Id,
-                ImageUrl = "https://via.placeholder.com/400x300?text=Photoshop+Basics",
+                ImageUrl = "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
